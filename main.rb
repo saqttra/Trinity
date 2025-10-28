@@ -9,9 +9,18 @@
 
 # frozen_string_literal: true
 
+# TODO: colors:
+# #56d364
+# #2ea043
+# #196c2e
+# #033a16
+# #151b23
+
 require 'io/console'
 
-rows, = IO.console.winsize
+RUNES = (32..126).map(&:chr).freeze
+
+rows, cols = IO.console.winsize
 winsize_changed = false
 
 trap('INT') do
@@ -20,7 +29,7 @@ trap('INT') do
 end
 
 trap('WINCH') do
-  rows, = IO.console.winsize
+  rows, cols = IO.console.winsize
   winsize_changed = true
 end
 
@@ -34,7 +43,7 @@ loop do
       break
     end
 
-    puts "Working... #{i} with row size: #{rows}"
+    puts Array.new(cols) { RUNES.sample }.join
     sleep 0.5
     i += 1
   end
