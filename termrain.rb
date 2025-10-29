@@ -5,7 +5,7 @@
 # This source code is licensed under the MIT license
 # found in the LICENSE file in the root directory.
 
-# <https://github.com/saqttra/Trinity>.
+# <https://github.com/saqttra/Termrain>.
 
 # frozen_string_literal: true
 
