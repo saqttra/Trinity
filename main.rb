@@ -9,16 +9,12 @@
 
 # frozen_string_literal: true
 
-# TODO: colors:
-# #56d364
-# #2ea043
-# #196c2e
-# #033a16
-# #151b23
-
 require 'io/console'
 
 RUNES = (32..126).map(&:chr).freeze
+
+# #56d364; #2ea043, #196c2e; #033a16; #151b23 (green palette)
+COLOR_STEPS = [235, 22, 28, 34, 83].freeze
 
 rows, cols = IO.console.winsize
 winsize_changed = false
@@ -57,7 +53,13 @@ loop do
 
       # in field of view?
       if (tail..head).include?(row)
-        line[col] = RUNES.sample
+        depth = head - row
+        ratio = depth.to_f / stream[:len]
+        index = (ratio * (COLOR_STEPS.length - 1)).round
+        color_code = COLOR_STEPS[index.clamp(0, COLOR_STEPS.length - 1)]
+
+        rune = RUNES.sample
+        line[col] = "\e[38;5;#{color_code}m#{rune}\e[0m"
       end
     end
 
