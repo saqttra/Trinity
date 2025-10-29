@@ -23,8 +23,13 @@ RUNES = (32..126).map(&:chr).freeze
 rows, cols = IO.console.winsize
 winsize_changed = false
 
+streams = Array.new(cols) do
+  { y: rand(-rows..rows), len: rand(2..(rows / 2)) }
+end
+
 trap('INT') do
   puts "\nReceived SIGINT signal"
+  print "\e[?25h"
   exit
 end
 
@@ -34,18 +39,54 @@ trap('WINCH') do
 end
 
 system 'clear'
+print "\e[?25l"
 
 loop do
-  i = 1
-  while i < rows
+  rows.times do |row|
     if winsize_changed
       winsize_changed = false
       break
     end
 
-    puts Array.new(cols) { RUNES.sample }.join
-    sleep 0.5
-    i += 1
+    line = Array.new(cols, ' ')
+
+    cols.times do |col|
+      stream = streams[col]
+      tail = stream[:y] - stream[:len]
+      head = stream[:y]
+
+      # in field of view?
+      if (tail..head).include?(row)
+        line[col] = RUNES.sample
+      end
+    end
+
+    3.times do
+      print "\r"
+      line.each do |rune|
+        if rune == ' '
+          print ' '
+        else
+          print RUNES.sample
+        end
+      end
+      sleep 0.015
+    end
+
+    print "\r"
+    puts line.join
+
+    streams.each do |stream|
+      stream[:y] += 1
+
+      # did it reach end of y-axis?
+      stream[:y] += 1
+      if stream[:y] - stream[:len] > rows
+        stream[:y] = rand(-rows..0)
+        stream[:len] = rand(5..(rows / 2))
+      end
+    end
+    sleep 0.095
   end
   system 'clear'
 end
